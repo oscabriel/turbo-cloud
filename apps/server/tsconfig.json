@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"lib": ["ESNext"],
+		"jsx": "react-jsx",
+		"jsxImportSource": "hono/jsx",
+		"types": ["./worker-configuration.d.ts", "node"],
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"tsc-alias": {
+		"resolveFullPaths": true
+	},
+	"include": ["src/**/*.ts", "src/**/*.tsx", "./worker-configuration.d.ts"]
+}
