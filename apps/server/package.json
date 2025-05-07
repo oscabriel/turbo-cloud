@@ -1,15 +1,31 @@
 {
 	"name": "server",
 	"scripts": {
-		"dev": "wrangler dev --port 3001",
+		"dev": "wrangler dev --port 3000",
 		"cf:deploy": "wrangler deploy",
-		"cf:typegen": "wrangler types --env-interface CloudflareBindings"
+		"cf:typegen": "wrangler types --env-interface CloudflareBindings",
+		"db:touch": "wrangler d1 execute turbo-cloud-db --local --command='SELECT 1'",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "wrangler d1 migrations apply turbo-cloud-db --local",
+		"db:migrate:prod": "wrangler d1 migrations apply turbo-cloud-db --remote",
+		"db:studio": "drizzle-kit studio",
+		"db:studio:prod": "ENVIRONMENT=production drizzle-kit studio"
 	},
 	"dependencies": {
-		"hono": "^4.7.8"
+		"@hono/trpc-server": "^0.3.4",
+		"@libsql/client": "^0.15.4",
+		"@trpc/client": "^11.1.2",
+		"@trpc/server": "^11.1.2",
+		"better-auth": "^1.2.7",
+		"dotenv": "^16.5.0",
+		"drizzle-orm": "^0.43.1",
+		"hono": "^4.7.8",
+		"resend": "^4.5.1",
+		"zod": "^3.24.4"
 	},
 	"devDependencies": {
 		"@types/node": "^22.15.6",
+		"drizzle-kit": "^0.31.1",
 		"tsc-alias": "^1.8.16",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3",

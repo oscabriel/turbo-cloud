@@ -1,10 +1,7 @@
 {
 	"name": "turbo-cloud",
 	"private": true,
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	],
+	"workspaces": ["apps/*", "packages/*"],
 	"scripts": {
 		"check": "biome check --write .",
 		"prepare": "husky",

@@ -9,11 +9,33 @@
 	"compatibility_date": "2025-05-05",
 	"compatibility_flags": ["nodejs_compat"],
 	"assets": {
+		"directory": "../web/dist/client",
 		"not_found_handling": "single-page-application"
 	},
 	"observability": {
 		"enabled": true
-	}
+	},
+	"vars": {
+		"ENVIRONMENT": "production",
+		"BETTER_AUTH_URL": "https://ristretto.app",
+		"CORS_ORIGIN": "https://ristretto.app",
+		"APP_NAME": "Turbo-Cloud",
+		"RESEND_FROM_EMAIL": "no-reply@better-cloud.dev"
+	},
+	"routes": [
+		{
+			"pattern": "ristretto.app",
+			"custom_domain": true
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "turbo-cloud-db",
+			"database_id": "997a8807-239a-4442-86a6-10eb817abfc4",
+			"migrations_dir": "./src/db/migrations"
+		}
+	]
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

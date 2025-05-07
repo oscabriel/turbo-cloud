@@ -11,9 +11,7 @@ export default defineConfig({
 		TanStackRouterVite({ autoCodeSplitting: true }),
 		viteReact(),
 		tailwindcss(),
-		cloudflare({
-			wranglerConfigPath: "../server/wrangler.jsonc",
-		}),
+		cloudflare(),
 	],
 	resolve: {
 		alias: {

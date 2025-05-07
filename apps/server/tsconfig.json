@@ -8,6 +8,9 @@
 		"lib": ["ESNext"],
 		"jsx": "react-jsx",
 		"jsxImportSource": "hono/jsx",
+		"composite": true,
+		"declaration": true,
+		"outDir": "./dist",
 		"types": ["./worker-configuration.d.ts", "node"],
 		"baseUrl": ".",
 		"paths": {

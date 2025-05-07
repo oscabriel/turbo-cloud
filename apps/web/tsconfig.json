@@ -24,5 +24,10 @@
 			"@/*": ["./src/*"]
 		}
 	},
+	"references": [
+		{
+			"path": "../server"
+		}
+	],
 	"include": ["**/*.ts", "**/*.tsx"]
 }

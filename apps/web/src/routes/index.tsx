@@ -1,182 +1,129 @@
-import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Card, CardContent } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc-client";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import cloudflareLogo from "/Cloudflare_Logo.svg";
-import reactLogo from "/react.svg";
-import viteLogo from "/vite.svg";
 
 export const Route = createFileRoute("/")({
-	component: App,
+	component: RouteComponent,
 });
 
-function App() {
-	const [count, setCount] = useState(0);
-	const [name, setName] = useState("unknown");
+const title = `
+
+ ███████████    █████████                 █████████  ███████████
+░░███░░░░░███  ███░░░░░███      ███      ███░░░░░███░░███░░░░░░█
+ ░███    ░███ ░███    ░███     ░███     ███     ░░░  ░███   █ ░ 
+ ░██████████  ░███████████  ███████████░███          ░███████   
+ ░███░░░░░███ ░███░░░░░███ ░░░░░███░░░ ░███          ░███░░░█   
+ ░███    ░███ ░███    ░███     ░███    ░░███     ███ ░███  ░    
+ ███████████  █████   █████    ░░░      ░░█████████  █████      
+░░░░░░░░░░░  ░░░░░   ░░░░░               ░░░░░░░░░  ░░░░░       
+
+`;
+
+function RouteComponent() {
+	const healthCheck = useQuery(trpc.healthCheck.queryOptions());
+	const helloFrom = useQuery({
+		...trpc.helloFrom.queryOptions(),
+		enabled: false,
+	});
 
 	return (
-		<div className="container mx-auto max-w-4xl px-4 py-10">
-			<div className="mb-4 flex justify-end">
-				<ThemeToggle />
-			</div>
+		<div className="container mx-auto w-full min-w-0 max-w-[90vw] px-3 py-3 sm:max-w-2xl sm:px-4 md:max-w-3xl">
+			<pre className="mx-auto overflow-x-auto text-center font-mono text-[0.5rem] sm:text-xs md:text-sm">
+				{title}
+			</pre>
+			<div className="grid gap-4 sm:gap-6">
+				<Card className="bg-background p-3 sm:p-4">
+					<CardContent className="p-0">
+						<div className="flex items-center justify-center gap-6">
+							<div>
+								<h2 className="mb-2 text-left font-medium">API Status</h2>
+								<Button
+									variant="outline"
+									className="w-full min-w-0 sm:w-auto"
+									onClick={() => {
+										healthCheck.refetch();
+									}}
+								>
+									<div
+										className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
+									/>
+									<span className="text-xs sm:text-sm">
+										{healthCheck.isLoading
+											? "Checking..."
+											: healthCheck.data
+												? "Connected"
+												: "Disconnected"}
+									</span>
+								</Button>
+							</div>
 
-			<div className="mb-6 flex items-center justify-center gap-6">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<a
-								href="https://vite.dev"
-								target="_blank"
-								rel="noreferrer"
-								className="transition-opacity hover:opacity-80"
-							>
-								<img src={viteLogo} className="h-16 w-16" alt="Vite logo" />
-							</a>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Vite: Next Generation Frontend Tooling</p>
-						</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<a
-								href="https://react.dev"
-								target="_blank"
-								rel="noreferrer"
-								className="transition-opacity hover:opacity-80"
-							>
-								<img src={reactLogo} className="h-16 w-16" alt="React logo" />
-							</a>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>React: A JavaScript library for building user interfaces</p>
-						</TooltipContent>
-					</Tooltip>
-
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<a
-								href="https://workers.cloudflare.com/"
-								target="_blank"
-								rel="noreferrer"
-								className="transition-opacity hover:opacity-80"
-							>
-								<img
-									src={cloudflareLogo}
-									className="h-32 w-32"
-									alt="Cloudflare logo"
-								/>
-							</a>
-						</TooltipTrigger>
-						<TooltipContent>
-							<p>Cloudflare Workers: Serverless execution environment</p>
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			</div>
-
-			<h1 className="mb-4 text-center font-bold text-4xl text-primary">
-				Vite + React + Cloudflare
-			</h1>
-			<p className="mb-8 text-center text-muted-foreground">
-				A modern web development stack
-			</p>
-
-			<Separator className="my-8" />
-
-			<div className="grid gap-6 md:grid-cols-2">
-				<Card className="shadow-md transition-shadow hover:shadow-lg">
-					<CardHeader>
-						<CardTitle>Counter Example</CardTitle>
-						<CardDescription>
-							Try clicking the button to update the count
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center justify-center">
-							<Button
-								onClick={() => setCount((count) => count + 1)}
-								aria-label="increment"
-								size="lg"
-								className="w-full sm:w-auto"
-							>
-								Count is {count}
-							</Button>
+							<div>
+								<h2 className="mb-2 text-center font-medium sm:text-left">
+									Hello From:
+								</h2>
+								<Button
+									variant="outline"
+									className="w-full min-w-0 sm:w-auto"
+									onClick={() => {
+										helloFrom.refetch();
+									}}
+								>
+									<span className="truncate text-xs sm:text-sm">
+										{helloFrom.data ?? "Click to Check"}
+									</span>
+								</Button>
+							</div>
 						</div>
 					</CardContent>
-					<CardFooter className="flex-col items-start">
-						<p className="text-muted-foreground text-sm">
-							Edit{" "}
-							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
-								src/App.tsx
-							</code>{" "}
-							and save to test HMR
-						</p>
-					</CardFooter>
 				</Card>
 
-				<Card className="shadow-md transition-shadow hover:shadow-lg">
-					<CardHeader>
-						<CardTitle>API Integration</CardTitle>
-						<CardDescription>
-							Fetch data from your Cloudflare Worker
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="flex items-center justify-center">
-							<Button
-								onClick={() => {
-									fetch("/api/")
-										.then((res) => res.json() as Promise<{ name: string }>)
-										.then((data) => setName(data.name));
-								}}
-								aria-label="get name"
-								variant="secondary"
-								size="lg"
-								className="w-full sm:w-auto"
-							>
-								Name from API is: {name}
-							</Button>
-						</div>
-					</CardContent>
-					<CardFooter className="flex-col items-start">
-						<p className="text-muted-foreground text-sm">
-							Edit{" "}
-							<code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
-								apps/server/src/index.ts
-							</code>{" "}
-							to change the name
-						</p>
-					</CardFooter>
-				</Card>
+				<section>
+					<h2 className="mb-2 font-medium text-2xl sm:mb-3">Core Features</h2>
+					<ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
+						<FeatureItem
+							title="Modern Frontend"
+							description="Easy builds with Vite + React"
+						/>
+						<FeatureItem
+							title="Edge Computing"
+							description="CF Workers for global edge deployment"
+						/>
+						<FeatureItem
+							title="Type-Safe API"
+							description="End-to-end type safety with Hono + tRPC"
+						/>
+						<FeatureItem
+							title="CF-Native Database"
+							description="D1 + Drizzle for easy db transactions"
+						/>
+						<FeatureItem
+							title="Tanstack Ecosystem"
+							description="Router + Query + Form for seamless DX"
+						/>
+						<FeatureItem
+							title="Fast Tooling"
+							description="Bun + Biome for speedy development"
+						/>
+					</ul>
+				</section>
 			</div>
-
-			<Separator className="my-8" />
-
-			<footer className="text-center text-muted-foreground text-sm">
-				<p className="mb-4">
-					Click on the logos above to learn more about each technology
-				</p>
-				<p className="text-xs">
-					Built with Vite, React, and Cloudflare Workers
-				</p>
-			</footer>
 		</div>
+	);
+}
+
+function FeatureItem({
+	title,
+	description,
+}: {
+	title: string;
+	description: string;
+}) {
+	return (
+		<li className="border-primary border-l-2 py-1 pl-2 sm:pl-3">
+			<h3 className="font-medium text-base sm:text-base">{title}</h3>
+			<p className="text-muted-foreground text-sm sm:text-sm">{description}</p>
+		</li>
 	);
 }
