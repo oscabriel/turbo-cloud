@@ -92,28 +92,28 @@ function RouteComponent() {
 					<h2 className="mb-2 font-medium text-2xl sm:mb-3">Core Features</h2>
 					<ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
 						<FeatureItem
-							title="Modern Frontend"
-							description="Easy builds with Vite + React"
+							title="Turborepo Monorepo"
+							description="Optimized build system for code sharing"
 						/>
 						<FeatureItem
-							title="Edge Computing"
-							description="CF Workers for global edge deployment"
+							title="PNPM Workspaces"
+							description="Fast, disk-efficient package management"
 						/>
 						<FeatureItem
-							title="Type-Safe API"
-							description="End-to-end type safety with Hono + tRPC"
+							title="Unified Deployment"
+							description="API on CF Workers + UI as Static Assets"
 						/>
 						<FeatureItem
 							title="CF-Native Database"
 							description="D1 + Drizzle for easy db transactions"
 						/>
 						<FeatureItem
-							title="Tanstack Ecosystem"
-							description="Router + Query + Form for seamless DX"
+							title="Modern Frontend"
+							description="Easy builds and HMR with Vite + React"
 						/>
 						<FeatureItem
-							title="Fast Tooling"
-							description="Bun + Biome for speedy development"
+							title="Tanstack Ecosystem"
+							description="Router + Query + Form for seamless DX"
 						/>
 					</ul>
 				</section>
