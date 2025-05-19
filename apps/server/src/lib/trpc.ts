@@ -1,7 +1,7 @@
 import { TRPCError, initTRPC } from "@trpc/server";
-import type { Context } from "./context";
+import type { tRPCContext } from "./types";
 
-export const t = initTRPC.context<Context>().create();
+export const t = initTRPC.context<tRPCContext>().create();
 
 export const router = t.router;
 

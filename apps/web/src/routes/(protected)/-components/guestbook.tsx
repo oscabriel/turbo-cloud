@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAppForm } from "@/components/ui/tanstack-form";
-import { useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { z } from "zod";
-import type { GuestBookMessage } from "../../../server/src/db/schema";
+import type { GuestBookMessage } from "../../../../../server/src/db/schema/guestbook";
 
 const GuestbookSchema = z.object({
 	name: z
@@ -22,7 +22,7 @@ const GuestbookSchema = z.object({
 
 export function Guestbook() {
 	// Get session with automatic refetching on window focus
-	const { data: session } = useSession();
+	const { data: session } = authClient.useSession();
 
 	// Get user profile with automatic refetching on window focus
 	const profile = useQuery({
@@ -181,38 +181,33 @@ export function Guestbook() {
 						<p className="text-center">Loading messages...</p>
 					) : messages.error ? (
 						<p className="text-center text-red-500">Error loading messages</p>
-					) : !messages.data || messages.data.length === 0 ? (
+					) : messages.data?.length === 0 ? (
 						<p className="text-center text-muted-foreground">
 							No guestbook messages. Be the first!
 						</p>
 					) : (
-						// Use a self-executing function to handle data with type assertion
-						(() => {
-							const messagesData =
-								messages.data as unknown as GuestBookMessage[];
-							return messagesData.map((msg) => (
-								<Card key={msg.id} className="gap-0 py-3">
-									<CardHeader>
-										<div className="flex items-start justify-between">
-											<CardTitle className="font-bold text-xl">
-												{msg.name}
-											</CardTitle>
-											<time className="text-muted-foreground text-sm">
-												{new Date(msg.createdAt).toLocaleDateString()}
-											</time>
-										</div>
-									</CardHeader>
-									<CardContent>
-										<p>{msg.message}</p>
-										{msg.country && (
-											<p className="mt-2 text-muted-foreground text-sm">
-												From: {msg.country}
-											</p>
-										)}
-									</CardContent>
-								</Card>
-							));
-						})()
+						messages.data?.map((msg: GuestBookMessage) => (
+							<Card key={msg.id} className="gap-0 py-3">
+								<CardHeader>
+									<div className="flex items-start justify-between">
+										<CardTitle className="font-bold text-xl">
+											{msg.name}
+										</CardTitle>
+										<time className="text-muted-foreground text-sm">
+											{new Date(msg.createdAt).toLocaleDateString()}
+										</time>
+									</div>
+								</CardHeader>
+								<CardContent>
+									<p>{msg.message}</p>
+									{msg.country && (
+										<p className="mt-2 text-muted-foreground text-sm">
+											From: {msg.country}
+										</p>
+									)}
+								</CardContent>
+							</Card>
+						))
 					)}
 				</div>
 			</div>

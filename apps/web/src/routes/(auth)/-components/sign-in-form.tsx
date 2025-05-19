@@ -1,27 +1,25 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { useAppForm } from "@/components/ui/tanstack-form";
-import { authClient, signIn, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 
 export function SignInForm() {
 	const navigate = useNavigate({
 		from: "/",
 	});
-	const { isPending, data } = useSession();
+	const { isPending } = authClient.useSession();
 	const [isOtpSent, setIsOtpSent] = useState(false);
 	const [email, setEmail] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-
-	// Redirect if already authenticated
-	useEffect(() => {
-		if (data?.session) {
-			navigate({ to: "/guestbook" });
-		}
-	}, [data?.session, navigate]);
 
 	const emailForm = useAppForm({
 		defaultValues: {
@@ -129,15 +127,19 @@ export function SignInForm() {
 	const handleGoogleLogin = async () => {
 		try {
 			setIsSubmitting(true);
-			await signIn.social(
+
+			const callbackURL = import.meta.env.PROD
+				? "https://ristretto.app/guestbook"
+				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
+
+			await authClient.signIn.social(
 				{
 					provider: "google",
-					callbackURL: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`,
+					callbackURL,
 				},
 				{
 					onSuccess: () => {
 						toast.success("Successfully signed in with Google");
-						navigate({ to: "/guestbook" });
 					},
 					onError: (error) => {
 						toast.error(
@@ -158,15 +160,19 @@ export function SignInForm() {
 	const handleGithubLogin = async () => {
 		try {
 			setIsSubmitting(true);
-			await signIn.social(
+
+			const callbackURL = import.meta.env.PROD
+				? "https://ristretto.app/guestbook"
+				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
+
+			await authClient.signIn.social(
 				{
 					provider: "github",
-					callbackURL: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`,
+					callbackURL,
 				},
 				{
 					onSuccess: () => {
 						toast.success("Successfully signed in with GitHub");
-						navigate({ to: "/guestbook" });
 					},
 					onError: (error) => {
 						toast.error(
@@ -189,7 +195,7 @@ export function SignInForm() {
 			<div className="mx-auto mt-10 w-full max-w-md p-6">
 				<h1 className="mb-2 text-center font-bold text-3xl">Welcome ☁️</h1>
 				<p className="mb-6 text-center text-muted-foreground">
-					Enter your email to sign in.
+					Choose a sign in method below.
 				</p>
 				{/* Render empty container while loading */}
 			</div>
@@ -200,7 +206,7 @@ export function SignInForm() {
 		<div className="mx-auto mt-10 w-full max-w-md p-6">
 			<h1 className="mb-2 text-center font-bold text-3xl">Welcome ☁️</h1>
 			<p className="mb-6 text-center text-muted-foreground">
-				Enter your email to sign in.
+				Choose a sign in method below.
 			</p>
 
 			{!isOtpSent && (
@@ -218,7 +224,7 @@ export function SignInForm() {
 												onChange={(e) => field.handleChange(e.target.value)}
 												onBlur={field.handleBlur}
 												disabled={isSubmitting}
-												placeholder="Enter your email"
+												placeholder="you@example.com"
 											/>
 										</field.FormControl>
 										<field.FormMessage />
@@ -235,7 +241,7 @@ export function SignInForm() {
 											!state.canSubmit || state.isSubmitting || isSubmitting
 										}
 									>
-										{state.isSubmitting || isSubmitting
+										{state.isSubmitting
 											? "Sending code..."
 											: "Send verification code"}
 									</Button>
@@ -259,7 +265,6 @@ export function SignInForm() {
 						<Button
 							type="button"
 							className="relative flex w-full items-center justify-center space-x-2 border border-gray-300 bg-background text-foreground hover:bg-accent dark:border-gray-600"
-							disabled={isSubmitting}
 							onClick={handleGoogleLogin}
 						>
 							<svg
@@ -295,7 +300,6 @@ export function SignInForm() {
 							type="button"
 							className="relative flex w-full items-center justify-center space-x-2 border border-gray-300 bg-background text-foreground hover:bg-accent dark:border-gray-600"
 							onClick={handleGithubLogin}
-							disabled={isSubmitting}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -327,17 +331,49 @@ export function SignInForm() {
 								<field.FormItem>
 									<field.FormLabel>Verification Code</field.FormLabel>
 									<field.FormControl>
-										<Input
-											type="text"
+										<InputOTP
 											value={field.state.value}
-											onChange={(e) => field.handleChange(e.target.value)}
+											onChange={(value) => field.handleChange(value)}
 											onBlur={field.handleBlur}
 											disabled={isSubmitting}
 											autoComplete="one-time-code"
 											inputMode="numeric"
 											pattern="[0-9]*"
-											placeholder="Enter verification code"
-										/>
+											maxLength={6}
+										>
+											<InputOTPGroup className="justify-center">
+												<InputOTPSlot
+													key={0}
+													index={0}
+													className="h-10 w-10 text-xl"
+												/>
+												<InputOTPSlot
+													key={1}
+													index={1}
+													className="h-10 w-10 text-xl"
+												/>
+												<InputOTPSlot
+													key={2}
+													index={2}
+													className="h-10 w-10 text-xl"
+												/>
+												<InputOTPSlot
+													key={3}
+													index={3}
+													className="h-10 w-10 text-xl"
+												/>
+												<InputOTPSlot
+													key={4}
+													index={4}
+													className="h-10 w-10 text-xl"
+												/>
+												<InputOTPSlot
+													key={5}
+													index={5}
+													className="h-10 w-10 text-xl"
+												/>
+											</InputOTPGroup>
+										</InputOTP>
 									</field.FormControl>
 									<field.FormMessage />
 								</field.FormItem>
@@ -353,9 +389,7 @@ export function SignInForm() {
 										!state.canSubmit || state.isSubmitting || isSubmitting
 									}
 								>
-									{state.isSubmitting || isSubmitting
-										? "Verifying..."
-										: "Verify & Sign In"}
+									{state.isSubmitting ? "Verifying..." : "Verify & Sign In"}
 								</Button>
 							)}
 						</otpForm.Subscribe>

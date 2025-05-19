@@ -1,13 +1,11 @@
 import { desc } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
-import { guestbook_message } from "../db/schema";
+import { guestbook_message } from "../db/schema/guestbook";
 import { publicProcedure, router } from "../lib/trpc";
 
 export const guestbookRouter = router({
 	getAll: publicProcedure.query(async ({ ctx }) => {
-		const db = drizzle(ctx.env.DB);
-		return await db
+		return await ctx.db
 			.select()
 			.from(guestbook_message)
 			.orderBy(desc(guestbook_message.createdAt));
@@ -21,8 +19,7 @@ export const guestbookRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const db = drizzle(ctx.env.DB);
-			return await db
+			return await ctx.db
 				.insert(guestbook_message)
 				.values({
 					name: input.name,

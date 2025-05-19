@@ -33,11 +33,9 @@ export function getLocalSQLiteDBPath() {
 		return path.resolve(basePath, files[0]);
 	} catch (error) {
 		if (error instanceof Error) {
-			throw new Error(`Error resolving local D1 DB: ${error.message}`, {
-				cause: error,
-			});
+			throw new Error(`Error resolving local D1 DB: ${error.message}`);
 		}
 
-		throw new Error("Error resolving local D1 DB", { cause: error });
+		throw new Error("Error resolving local D1 DB");
 	}
 }

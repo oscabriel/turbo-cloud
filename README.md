@@ -4,9 +4,9 @@ A monorepo template for Cloudflare Workers using Turborepo, with a React fronten
 
 ## Structure
 
-- `apps/web`: React frontend built with Vite and deployed as a Cloudflare Worker
+- `apps/web`: React frontend built with Vite
 - `apps/server`: Hono API backend deployed as a Cloudflare Worker
-- Both apps can be deployed separately during development, and combined for production
+- `packages/shared`: Common code used by either app (TODO)
 
 ## Development
 
@@ -30,21 +30,23 @@ pnpm install
 pnpm dev
 ```
 
-This will start both the web and server apps concurrently:
-- Web: http://localhost:5173
-- Server: http://localhost:8787
+This will start both the web and server apps concurrently using Turborepo:
+- Web: http://localhost:3001
+- Server: http://localhost:3000
 
 During development:
-- The web app will proxy API requests to the server app
-- You can make changes to either app and they'll hot reload
+- You'll mainly keep the `web` dev server loaded in your browser
+- The `web` app will proxy API requests from the `server` app
+- You can make changes to either app with HMR
 
 ## Building for Production
 
 ```bash
+cd apps/web
 pnpm build
 ```
 
-This will build both the web and server apps, with the server app configured to serve the static assets from the web app.
+This will build both the `web` app.
 
 ## Deployment
 
@@ -52,12 +54,10 @@ To deploy the unified application to Cloudflare:
 
 ```bash
 cd apps/server
-pnpm wrangler deploy
+pnpm cf:deploy
 ```
 
-This will:
-1. Build both apps
-2. Deploy the server app with the web app's static assets bundled in
+This will deploy the `server` app with the `web` app's built static assets bundled in.
 
 ## Key Features
 

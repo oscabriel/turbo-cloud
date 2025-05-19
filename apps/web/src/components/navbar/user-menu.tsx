@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,13 +10,10 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { LogOutIcon, UserCircleIcon } from "lucide-react";
-import { Button } from "../ui/button";
 
-export default function UserMenu() {
-	const navigate = useNavigate();
+export function UserMenu() {
 	const { data: session } = authClient.useSession();
 
 	if (!session) {
@@ -76,15 +74,7 @@ export default function UserMenu() {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={() => {
-						authClient.signOut({
-							fetchOptions: {
-								onSuccess: () => {
-									navigate({
-										to: "/",
-									});
-								},
-							},
-						});
+						authClient.signOut();
 					}}
 				>
 					<LogOutIcon className="mr-2 size-4" />

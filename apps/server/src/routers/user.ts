@@ -1,19 +1,15 @@
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
-import { user } from "../db/schema";
+import { user } from "../db/schema/auth";
 import { protectedProcedure, router } from "../lib/trpc";
 
 export const userRouter = router({
 	getProfile: protectedProcedure.query(async ({ ctx }) => {
-		const db = drizzle(ctx.env.DB);
-		const userData = await db
+		return await ctx.db
 			.select()
 			.from(user)
-			.where(eq(user.id, ctx.session.user.id))
+			.where(eq(user.id, ctx.session.userId))
 			.get();
-
-		return userData;
 	}),
 	updateProfile: protectedProcedure
 		.input(
@@ -23,15 +19,14 @@ export const userRouter = router({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const db = drizzle(ctx.env.DB);
-			return await db
+			return await ctx.db
 				.update(user)
 				.set({
 					name: input.name,
 					image: input.image,
 					updatedAt: new Date(),
 				})
-				.where(eq(user.id, ctx.session.user.id))
+				.where(eq(user.id, ctx.session.userId))
 				.returning()
 				.get();
 		}),

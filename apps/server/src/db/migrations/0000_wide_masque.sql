@@ -15,14 +15,8 @@ CREATE TABLE `account` (
 	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `guestbook_message` (
-	`id` integer PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`message` text NOT NULL,
-	`country` text,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
---> statement-breakpoint
+CREATE INDEX `idx_account_user_id` ON `account` (`user_id`);--> statement-breakpoint
+CREATE INDEX `idx_account_provider_account` ON `account` (`provider_id`,`account_id`);--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expires_at` integer NOT NULL,
@@ -36,6 +30,7 @@ CREATE TABLE `session` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `session_token_unique` ON `session` (`token`);--> statement-breakpoint
+CREATE INDEX `idx_session_user_id` ON `session` (`user_id`);--> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -55,3 +50,15 @@ CREATE TABLE `verification` (
 	`created_at` integer,
 	`updated_at` integer
 );
+--> statement-breakpoint
+CREATE INDEX `idx_verification_identifier` ON `verification` (`identifier`);--> statement-breakpoint
+CREATE INDEX `idx_verification_expires_at` ON `verification` (`expires_at`);--> statement-breakpoint
+CREATE TABLE `guestbook_message` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`message` text NOT NULL,
+	`country` text,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+--> statement-breakpoint
+CREATE INDEX `idx_guestbook_created_at` ON `guestbook_message` (`created_at`);

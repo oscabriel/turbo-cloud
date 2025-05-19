@@ -1,24 +1,14 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"strict": true,
-		"skipLibCheck": true,
-		"lib": ["ESNext"],
 		"jsx": "react-jsx",
-		"jsxImportSource": "hono/jsx",
-		"composite": true,
-		"declaration": true,
-		"outDir": "./dist",
-		"types": ["./worker-configuration.d.ts", "node"],
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["./src/*"]
-		}
+		"types": ["./worker-configuration.d.ts", "node"]
 	},
-	"tsc-alias": {
-		"resolveFullPaths": true
-	},
-	"include": ["src/**/*.ts", "src/**/*.tsx", "./worker-configuration.d.ts"]
+	"include": [
+		"src/**/*",
+		"worker-configuration.d.ts",
+		"drizzle.config.ts",
+		"wrangler.jsonc"
+	],
+	"exclude": ["node_modules", "dist"]
 }

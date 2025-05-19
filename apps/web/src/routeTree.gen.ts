@@ -11,28 +11,22 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SignInImport } from './routes/sign-in'
-import { Route as ProfileImport } from './routes/profile'
-import { Route as GuestbookImport } from './routes/guestbook'
+import { Route as protectedLayoutImport } from './routes/(protected)/layout'
+import { Route as authLayoutImport } from './routes/(auth)/layout'
 import { Route as IndexImport } from './routes/index'
+import { Route as protectedProfileImport } from './routes/(protected)/profile'
+import { Route as protectedGuestbookImport } from './routes/(protected)/guestbook'
+import { Route as authSignInImport } from './routes/(auth)/sign-in'
 
 // Create/Update Routes
 
-const SignInRoute = SignInImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
+const protectedLayoutRoute = protectedLayoutImport.update({
+  id: '/(protected)',
   getParentRoute: () => rootRoute,
 } as any)
 
-const ProfileRoute = ProfileImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const GuestbookRoute = GuestbookImport.update({
-  id: '/guestbook',
-  path: '/guestbook',
+const authLayoutRoute = authLayoutImport.update({
+  id: '/(auth)',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -40,6 +34,24 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const protectedProfileRoute = protectedProfileImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
+
+const protectedGuestbookRoute = protectedGuestbookImport.update({
+  id: '/guestbook',
+  path: '/guestbook',
+  getParentRoute: () => protectedLayoutRoute,
+} as any)
+
+const authSignInRoute = authSignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => authLayoutRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -53,75 +65,122 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/guestbook': {
-      id: '/guestbook'
-      path: '/guestbook'
-      fullPath: '/guestbook'
-      preLoaderRoute: typeof GuestbookImport
+    '/(auth)': {
+      id: '/(auth)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof authLayoutImport
       parentRoute: typeof rootRoute
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileImport
+    '/(protected)': {
+      id: '/(protected)'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof protectedLayoutImport
       parentRoute: typeof rootRoute
     }
-    '/sign-in': {
-      id: '/sign-in'
+    '/(auth)/sign-in': {
+      id: '/(auth)/sign-in'
       path: '/sign-in'
       fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof authSignInImport
+      parentRoute: typeof authLayoutImport
+    }
+    '/(protected)/guestbook': {
+      id: '/(protected)/guestbook'
+      path: '/guestbook'
+      fullPath: '/guestbook'
+      preLoaderRoute: typeof protectedGuestbookImport
+      parentRoute: typeof protectedLayoutImport
+    }
+    '/(protected)/profile': {
+      id: '/(protected)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof protectedProfileImport
+      parentRoute: typeof protectedLayoutImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface authLayoutRouteChildren {
+  authSignInRoute: typeof authSignInRoute
+}
+
+const authLayoutRouteChildren: authLayoutRouteChildren = {
+  authSignInRoute: authSignInRoute,
+}
+
+const authLayoutRouteWithChildren = authLayoutRoute._addFileChildren(
+  authLayoutRouteChildren,
+)
+
+interface protectedLayoutRouteChildren {
+  protectedGuestbookRoute: typeof protectedGuestbookRoute
+  protectedProfileRoute: typeof protectedProfileRoute
+}
+
+const protectedLayoutRouteChildren: protectedLayoutRouteChildren = {
+  protectedGuestbookRoute: protectedGuestbookRoute,
+  protectedProfileRoute: protectedProfileRoute,
+}
+
+const protectedLayoutRouteWithChildren = protectedLayoutRoute._addFileChildren(
+  protectedLayoutRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/guestbook': typeof GuestbookRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
+  '/': typeof protectedLayoutRouteWithChildren
+  '/sign-in': typeof authSignInRoute
+  '/guestbook': typeof protectedGuestbookRoute
+  '/profile': typeof protectedProfileRoute
 }
 
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/guestbook': typeof GuestbookRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
+  '/': typeof protectedLayoutRouteWithChildren
+  '/sign-in': typeof authSignInRoute
+  '/guestbook': typeof protectedGuestbookRoute
+  '/profile': typeof protectedProfileRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/guestbook': typeof GuestbookRoute
-  '/profile': typeof ProfileRoute
-  '/sign-in': typeof SignInRoute
+  '/(auth)': typeof authLayoutRouteWithChildren
+  '/(protected)': typeof protectedLayoutRouteWithChildren
+  '/(auth)/sign-in': typeof authSignInRoute
+  '/(protected)/guestbook': typeof protectedGuestbookRoute
+  '/(protected)/profile': typeof protectedProfileRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/guestbook' | '/profile' | '/sign-in'
+  fullPaths: '/' | '/sign-in' | '/guestbook' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/guestbook' | '/profile' | '/sign-in'
-  id: '__root__' | '/' | '/guestbook' | '/profile' | '/sign-in'
+  to: '/' | '/sign-in' | '/guestbook' | '/profile'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)'
+    | '/(protected)'
+    | '/(auth)/sign-in'
+    | '/(protected)/guestbook'
+    | '/(protected)/profile'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GuestbookRoute: typeof GuestbookRoute
-  ProfileRoute: typeof ProfileRoute
-  SignInRoute: typeof SignInRoute
+  authLayoutRoute: typeof authLayoutRouteWithChildren
+  protectedLayoutRoute: typeof protectedLayoutRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GuestbookRoute: GuestbookRoute,
-  ProfileRoute: ProfileRoute,
-  SignInRoute: SignInRoute,
+  authLayoutRoute: authLayoutRouteWithChildren,
+  protectedLayoutRoute: protectedLayoutRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -135,22 +194,37 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/guestbook",
-        "/profile",
-        "/sign-in"
+        "/(auth)",
+        "/(protected)"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/guestbook": {
-      "filePath": "guestbook.tsx"
+    "/(auth)": {
+      "filePath": "(auth)/layout.tsx",
+      "children": [
+        "/(auth)/sign-in"
+      ]
     },
-    "/profile": {
-      "filePath": "profile.tsx"
+    "/(protected)": {
+      "filePath": "(protected)/layout.tsx",
+      "children": [
+        "/(protected)/guestbook",
+        "/(protected)/profile"
+      ]
     },
-    "/sign-in": {
-      "filePath": "sign-in.tsx"
+    "/(auth)/sign-in": {
+      "filePath": "(auth)/sign-in.tsx",
+      "parent": "/(auth)"
+    },
+    "/(protected)/guestbook": {
+      "filePath": "(protected)/guestbook.tsx",
+      "parent": "/(protected)"
+    },
+    "/(protected)/profile": {
+      "filePath": "(protected)/profile.tsx",
+      "parent": "/(protected)"
     }
   }
 }

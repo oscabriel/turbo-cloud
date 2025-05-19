@@ -4,6 +4,7 @@ packages:
 onlyBuiltDependencies:
   - '@biomejs/biome'
   - '@swc/core'
+  - '@tailwindcss/oxide'
   - esbuild
   - sharp
   - workerd

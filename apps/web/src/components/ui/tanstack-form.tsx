@@ -1,13 +1,13 @@
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
 	createFormHook,
 	createFormHookContexts,
 	useStore,
 } from "@tanstack/react-form";
+import { Label } from "./label";
 
 const {
 	fieldContext,
