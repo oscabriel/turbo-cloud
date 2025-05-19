@@ -7,10 +7,12 @@ import {
 	HeadContent,
 	Outlet,
 	createRootRouteWithContext,
+	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import "../index.css";
 import { Header } from "@/components/navbar/header";
+import { Loader } from "@/components/navbar/loader";
 
 export interface RouterAppContext {
 	trpc: typeof trpc;
@@ -34,13 +36,17 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+	const isFetching = useRouterState({
+		select: (s) => s.isLoading,
+	});
+
 	return (
 		<>
 			<HeadContent />
 			<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 				<div className="grid h-svh grid-rows-[auto_1fr]">
 					<Header />
-					<Outlet />
+					{isFetching ? <Loader /> : <Outlet />}
 				</div>
 				<Toaster richColors />
 			</ThemeProvider>

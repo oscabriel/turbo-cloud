@@ -6,7 +6,6 @@ import { authClient } from "@/lib/auth-client";
 import { trpc } from "@/lib/trpc-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { useCallback } from "react";
 import { z } from "zod";
 import type { GuestBookMessage } from "../../../../../server/src/db/schema/guestbook";
 
@@ -86,15 +85,6 @@ export function Guestbook() {
 		},
 	});
 
-	const handleSubmit = useCallback(
-		(e: React.FormEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			form.handleSubmit();
-		},
-		[form],
-	);
-
 	return (
 		<div className="container mx-auto w-full min-w-0 max-w-[90vw] px-3 py-2 sm:max-w-2xl sm:px-4 md:max-w-3xl">
 			<div className="mx-auto w-full max-w-xl space-y-8">
@@ -102,7 +92,14 @@ export function Guestbook() {
 					<h2 className="text-center font-bold text-2xl">Guestbook</h2>
 
 					<form.AppForm>
-						<form onSubmit={handleSubmit} className="space-y-4">
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								form.handleSubmit();
+							}}
+							className="space-y-4"
+						>
 							{!profile.data?.name && !session?.user?.name && (
 								<form.AppField name="name">
 									{(field) => (

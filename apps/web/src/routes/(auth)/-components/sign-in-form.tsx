@@ -7,8 +7,9 @@ import {
 } from "@/components/ui/input-otp";
 import { useAppForm } from "@/components/ui/tanstack-form";
 import { authClient } from "@/lib/auth-client";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -19,7 +20,68 @@ export function SignInForm() {
 	const { isPending } = authClient.useSession();
 	const [isOtpSent, setIsOtpSent] = useState(false);
 	const [email, setEmail] = useState("");
-	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	// Email OTP send mutation
+	const sendOtpMutation = useMutation({
+		mutationFn: async (email: string) => {
+			return authClient.emailOtp.sendVerificationOtp({
+				email,
+				type: "sign-in",
+			});
+		},
+		onSuccess: () => {
+			setIsOtpSent(true);
+			toast.success("Verification code sent to your email");
+		},
+		onError: (error: { error?: { message?: string } }) => {
+			toast.error(error.error?.message || "Failed to send verification code");
+		},
+	});
+
+	// Sign in with OTP mutation
+	const verifyOtpMutation = useMutation({
+		mutationFn: async ({ email, otp }: { email: string; otp: string }) => {
+			return authClient.signIn.emailOtp({ email, otp });
+		},
+		onSuccess: async () => {
+			toast.success("Sign in successful");
+			// Wait for session to be available
+			const session = await authClient.getSession();
+			if (session) {
+				navigate({
+					to: "/guestbook",
+				});
+			} else {
+				toast.error("Failed to establish session");
+			}
+		},
+		onError: (error: { error?: { message?: string } }) => {
+			toast.error(error.error?.message || "Failed to verify code");
+		},
+	});
+
+	// Social sign in mutations
+	const socialSignInMutation = useMutation({
+		mutationFn: async ({ provider }: { provider: "google" | "github" }) => {
+			const callbackURL = import.meta.env.PROD
+				? "https://turbo-cloud.oscargabriel.workers.dev/guestbook"
+				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
+
+			return authClient.signIn.social({
+				provider,
+				callbackURL,
+			});
+		},
+		onSuccess: (_, variables) => {
+			toast.success(`Successfully signed in with ${variables.provider}`);
+		},
+		onError: (error: { error?: { message?: string } }, variables) => {
+			toast.error(
+				error.error?.message || `Failed to sign in with ${variables.provider}`,
+			);
+			console.error(`${variables.provider} sign-in error:`, error);
+		},
+	});
 
 	const emailForm = useAppForm({
 		defaultValues: {
@@ -31,31 +93,8 @@ export function SignInForm() {
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				setIsSubmitting(true);
-				setEmail(value.email);
-				await authClient.emailOtp.sendVerificationOtp(
-					{
-						email: value.email,
-						type: "sign-in",
-					},
-					{
-						onSuccess: () => {
-							setIsOtpSent(true);
-							toast.success("Verification code sent to your email");
-						},
-						onError: (error) => {
-							toast.error(
-								error.error?.message || "Failed to send verification code",
-							);
-						},
-					},
-				);
-			} catch (error) {
-				toast.error("An unexpected error occurred. Please try again.");
-			} finally {
-				setIsSubmitting(false);
-			}
+			setEmail(value.email);
+			sendOtpMutation.mutate(value.email);
 		},
 	});
 
@@ -69,126 +108,23 @@ export function SignInForm() {
 			}),
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				setIsSubmitting(true);
-				await authClient.signIn.emailOtp(
-					{
-						email,
-						otp: value.otp,
-					},
-					{
-						onSuccess: async () => {
-							toast.success("Sign in successful");
-							// Wait for session to be available
-							const session = await authClient.getSession();
-							if (session) {
-								navigate({
-									to: "/guestbook",
-								});
-							} else {
-								toast.error("Failed to establish session");
-							}
-						},
-						onError: (error) => {
-							toast.error(error.error?.message || "Failed to verify code");
-							// If the error indicates invalid OTP, clear the field
-							if (error.error?.message?.toLowerCase().includes("invalid")) {
-								otpForm.setFieldValue("otp", "");
-							}
-						},
-					},
-				);
-			} catch (error) {
-				toast.error("An unexpected error occurred. Please try again.");
-			} finally {
-				setIsSubmitting(false);
-			}
+			verifyOtpMutation.mutate({ email, otp: value.otp });
 		},
 	});
 
-	const handleEmailSubmit = useCallback(
-		(e: React.FormEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			void emailForm.handleSubmit();
-		},
-		[emailForm],
-	);
-
-	const handleOtpSubmit = useCallback(
-		(e: React.FormEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			void otpForm.handleSubmit();
-		},
-		[otpForm],
-	);
-
-	const handleGoogleLogin = async () => {
-		try {
-			setIsSubmitting(true);
-
-			const callbackURL = import.meta.env.PROD
-				? "https://ristretto.app/guestbook"
-				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
-
-			await authClient.signIn.social(
-				{
-					provider: "google",
-					callbackURL,
-				},
-				{
-					onSuccess: () => {
-						toast.success("Successfully signed in with Google");
-					},
-					onError: (error) => {
-						toast.error(
-							error.error?.message || "Failed to sign in with Google",
-						);
-						console.error("Google sign-in error:", error);
-					},
-				},
-			);
-		} catch (error) {
-			toast.error("An unexpected error occurred during Google sign-in");
-			console.error("Google sign-in exception:", error);
-		} finally {
-			setIsSubmitting(false);
-		}
+	const handleGoogleLogin = () => {
+		socialSignInMutation.mutate({ provider: "google" });
 	};
 
-	const handleGithubLogin = async () => {
-		try {
-			setIsSubmitting(true);
-
-			const callbackURL = import.meta.env.PROD
-				? "https://ristretto.app/guestbook"
-				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
-
-			await authClient.signIn.social(
-				{
-					provider: "github",
-					callbackURL,
-				},
-				{
-					onSuccess: () => {
-						toast.success("Successfully signed in with GitHub");
-					},
-					onError: (error) => {
-						toast.error(
-							error.error?.message || "Failed to sign in with GitHub",
-						);
-						console.error("GitHub sign-in error:", error);
-					},
-				},
-			);
-		} catch (error) {
-			toast.error("An unexpected error occurred during GitHub sign-in");
-			console.error("GitHub sign-in exception:", error);
-		} finally {
-			setIsSubmitting(false);
-		}
+	const handleGithubLogin = () => {
+		socialSignInMutation.mutate({ provider: "github" });
 	};
+
+	// Reset OTP form when verification fails
+	if (verifyOtpMutation.isError) {
+		otpForm.setFieldValue("otp", "");
+		verifyOtpMutation.reset();
+	}
 
 	if (isPending) {
 		return (
@@ -212,7 +148,14 @@ export function SignInForm() {
 			{!isOtpSent && (
 				<>
 					<emailForm.AppForm>
-						<form onSubmit={handleEmailSubmit} className="space-y-4">
+						<form
+							onSubmit={(e) => {
+								e.preventDefault();
+								e.stopPropagation();
+								void emailForm.handleSubmit();
+							}}
+							className="space-y-4"
+						>
 							<emailForm.AppField name="email">
 								{(field) => (
 									<field.FormItem>
@@ -223,7 +166,7 @@ export function SignInForm() {
 												value={field.state.value}
 												onChange={(e) => field.handleChange(e.target.value)}
 												onBlur={field.handleBlur}
-												disabled={isSubmitting}
+												disabled={sendOtpMutation.isPending}
 												placeholder="you@example.com"
 											/>
 										</field.FormControl>
@@ -238,10 +181,12 @@ export function SignInForm() {
 										type="submit"
 										className="w-full"
 										disabled={
-											!state.canSubmit || state.isSubmitting || isSubmitting
+											!state.canSubmit ||
+											state.isSubmitting ||
+											sendOtpMutation.isPending
 										}
 									>
-										{state.isSubmitting
+										{sendOtpMutation.isPending
 											? "Sending code..."
 											: "Send verification code"}
 									</Button>
@@ -266,6 +211,7 @@ export function SignInForm() {
 							type="button"
 							className="relative flex w-full items-center justify-center space-x-2 border border-gray-300 bg-background text-foreground hover:bg-accent dark:border-gray-600"
 							onClick={handleGoogleLogin}
+							disabled={socialSignInMutation.isPending}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -300,6 +246,7 @@ export function SignInForm() {
 							type="button"
 							className="relative flex w-full items-center justify-center space-x-2 border border-gray-300 bg-background text-foreground hover:bg-accent dark:border-gray-600"
 							onClick={handleGithubLogin}
+							disabled={socialSignInMutation.isPending}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -321,7 +268,14 @@ export function SignInForm() {
 
 			{isOtpSent && (
 				<otpForm.AppForm>
-					<form onSubmit={handleOtpSubmit} className="space-y-4">
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							e.stopPropagation();
+							void otpForm.handleSubmit();
+						}}
+						className="space-y-4"
+					>
 						<p className="mb-4 text-center text-gray-600 text-sm">
 							We've sent a verification code to{" "}
 							<span className="font-medium">{email}</span>.
@@ -335,7 +289,7 @@ export function SignInForm() {
 											value={field.state.value}
 											onChange={(value) => field.handleChange(value)}
 											onBlur={field.handleBlur}
-											disabled={isSubmitting}
+											disabled={verifyOtpMutation.isPending}
 											autoComplete="one-time-code"
 											inputMode="numeric"
 											pattern="[0-9]*"
@@ -386,10 +340,14 @@ export function SignInForm() {
 									type="submit"
 									className="w-full"
 									disabled={
-										!state.canSubmit || state.isSubmitting || isSubmitting
+										!state.canSubmit ||
+										state.isSubmitting ||
+										verifyOtpMutation.isPending
 									}
 								>
-									{state.isSubmitting ? "Verifying..." : "Verify & Sign In"}
+									{verifyOtpMutation.isPending
+										? "Verifying..."
+										: "Verify & Sign In"}
 								</Button>
 							)}
 						</otpForm.Subscribe>
@@ -402,7 +360,7 @@ export function SignInForm() {
 								setIsOtpSent(false);
 								otpForm.setFieldValue("otp", "");
 							}}
-							disabled={isSubmitting}
+							disabled={verifyOtpMutation.isPending}
 						>
 							Back to Email
 						</Button>

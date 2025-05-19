@@ -32,6 +32,13 @@
 		"db:generate": {
 			"cache": false,
 			"persistent": true
+		},
+		"cf:typegen": {
+			"cache": false
+		},
+		"cf:deploy": {
+			"cache": false,
+			"dependsOn": ["build"]
 		}
 	}
 }

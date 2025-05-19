@@ -9,7 +9,7 @@ export interface AppBindings {
 	Bindings: {
 		ASSETS: Fetcher;
 		DB: D1Database;
-		SESSION_KV: KVNamespace;
+		// SESSION_KV: KVNamespace;
 		CORS_ORIGIN: string;
 		ENVIRONMENT: string;
 		CLOUDFLARE_ACCOUNT_ID: string;
