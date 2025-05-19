@@ -8,6 +8,17 @@ A monorepo template for Cloudflare Workers using Turborepo, with a React fronten
 - `apps/server`: Hono API backend deployed as a Cloudflare Worker
 - `packages/shared`: Common code used by either app (TODO)
 
+## Tech Stack
+
+- 🖥️ **Frontend App**: React 19, TypeScript, Vite for fast builds & HMR
+- 🌐 **Backend App**: Hono on Cloudflare Workers, end-to-end type-safe API with tRPC & Zod
+- 🔒 **Authentication**: Email OTP & social OAuth using Better Auth
+- 💾 **Database**: Cloudflare D1 via Drizzle ORM with migrations & local SQLite file for development
+- 🔄 **Routing & Data**: Tanstack Router, Query, and Form
+- 🎨 **Styling**: Tailwind CSS, shadcn/ui components, sonner toast notifications
+- 🌍 **Edge-First Deployment**: Cloudflare Workers provides a global CDN and cache for fast rendering
+- 🧰 **Tooling**: Biome for linting/formatting, pnpm for package management and monorepo workspaces
+
 ## Development
 
 ### Prerequisites

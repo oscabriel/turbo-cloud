@@ -57,7 +57,7 @@ export function Header() {
 							<DropdownMenuSeparator />
 							<DropdownMenuItem asChild className="text-lg">
 								<a
-									href="https://github.com/oscarhernandeziv/better-cloud/tree/main"
+									href="https://github.com/oscabriel/turbo-cloud/tree/main"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="flex w-full items-center gap-1"
@@ -79,7 +79,7 @@ export function Header() {
 					))}
 					<Button className="mr-1 text-lg" variant="ghost" asChild>
 						<a
-							href="https://github.com/oscarhernandeziv/better-cloud/tree/main"
+							href="https://github.com/oscabriel/turbo-cloud/tree/main"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex items-center gap-1"
