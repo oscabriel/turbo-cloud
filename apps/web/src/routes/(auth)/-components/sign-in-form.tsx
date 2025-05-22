@@ -64,8 +64,8 @@ export function SignInForm() {
 	const socialSignInMutation = useMutation({
 		mutationFn: async ({ provider }: { provider: "google" | "github" }) => {
 			const callbackURL = import.meta.env.PROD
-				? "https://turbo-cloud.oscargabriel.workers.dev/guestbook"
-				: `${import.meta.env.VITE_FRONTEND_URL}/guestbook`;
+				? `${import.meta.env.VITE_FRONTEND_PROD_URL}/guestbook`
+				: `${import.meta.env.VITE_FRONTEND_DEV_URL}/guestbook`;
 
 			return authClient.signIn.social({
 				provider,
